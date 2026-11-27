@@ -1,150 +1,55 @@
-# 🛡️ PhishShield AI
-### AI-Powered Phishing Detection with Explainable AI
 
-PhishShield AI is a Machine Learning-based phishing detection system designed to identify potentially malicious URLs and phishing emails. The project combines automated phishing detection with Explainable AI (XAI) to provide users with understandable insights into prediction results.
+# PhishShield AI — real web application baseline
 
-The system analyzes submitted URLs and email content, predicts whether they are safe or potentially phishing-related, and provides a risk score, confidence level, and explanations to help users understand the results.
+This version converts the single-file prototype into a small Flask + SQLite web application.
 
----
+## What changed
+- Real account registration and login.
+- Passwords are hashed; no password is stored as plain text.
+- Server-side validation for registration/login and scan input.
+- User-specific persistent scan history.
+- Dashboard and reports are calculated only from stored scans.
+- No seeded fake scan records and no random counters.
+- URL scans perform server-side checks for HTTPS, URL structure, redirects, HTTP status and RDAP registration date when available.
+- Scan evidence is stored with every scan.
+- Settings are persisted.
+- The result page explicitly calls the method a transparent feature-based risk analysis instead of falsely claiming validated ML/SHAP output.
 
-## 📌 Project Overview
+## Important limitation
+A normal hosted website cannot directly open Windows Sandbox on your personal computer. Windows Sandbox is a local Windows isolation feature. For a public deployment, use a dedicated isolated sandbox service/worker if you want dynamic detonation of suspicious pages/files. Do not execute arbitrary submitted URLs inside the same web server.
 
-Phishing is one of the common cybersecurity threats in which attackers use fraudulent websites and messages to trick users into revealing sensitive information.
+## Run on Windows
+1. Install Python 3.11+.
+2. Open a terminal in this folder.
+3. Create a virtual environment:
+   `python -m venv .venv`
+4. Activate:
+   `.venv\Scripts\activate`
+5. Install:
+   `pip install -r requirements.txt`
+6. Start:
+   `python app.py`
+7. Open:
+   `http://127.0.0.1:5000`
 
-PhishShield AI aims to make phishing detection easier through an automated system that analyzes URLs and email text using Machine Learning techniques.
+## Deploy
+Use a Python host that supports Flask/Gunicorn. Set a strong `PHISHSHIELD_SECRET` environment variable. For production, use PostgreSQL instead of SQLite if you expect multiple server instances/users.
 
-Unlike a basic detection system, PhishShield AI also focuses on explainability. It uses SHAP (SHapley Additive exPlanations) to help explain the factors that contribute to a prediction.
-
-## 🎯 Project Objectives
-
-- Detect potentially malicious URLs using Machine Learning.
-- Identify phishing attempts in email text.
-- Provide risk scores for submitted inputs.
-- Display prediction confidence levels.
-- Improve transparency through Explainable AI.
-- Maintain a history of previous scans.
-- Present scan information through a user-friendly dashboard.
-
-## ✨ Key Features
-
-### 1. URL Phishing Detection
-- Accepts website URLs for analysis.
-- Examines URL-related features.
-- Predicts whether a URL is safe or potentially phishing-related.
-- Displays the prediction result, risk score, and confidence level.
-
-### 2. Email Phishing Detection
-- Allows users to submit email text for analysis.
-- Examines the submitted content for suspicious characteristics.
-- Identifies potentially phishing-related messages.
-- Displays the classification result.
-
-### 3. Explainable AI using SHAP
-- Integrates SHAP for model explainability.
-- Helps identify important features influencing predictions.
-- Provides additional insight into why a URL may be classified as suspicious.
-- Improves the interpretability of Machine Learning predictions.
-
-### 4. Dashboard
-The dashboard provides an overview of the detection activities, including:
-
-- Total number of scans.
-- Safe and phishing detection statistics.
-- Scan activity overview.
-- Weekly scan visualization.
-- Phishing category information.
-
-### 5. Scan History
-- Maintains records of previous scans.
-- Displays scan date and time.
-- Shows input type and prediction results.
-- Provides risk and confidence information.
-- Helps users review previous detection activities.
-
----
-
-## 🛠️ Technologies Used
-
-| Technology | Purpose |
-|---|---|
-| Python | Main programming language |
-| Flask | Web application framework |
-| Machine Learning | Phishing classification |
-| Scikit-learn | Machine Learning utilities |
-| SHAP | Explainable AI |
-| Pandas | Dataset processing |
-| HTML | Web page structure |
-| CSS | User interface styling |
-
----
-
-## 🧠 Explainable AI (XAI)
-
-PhishShield AI integrates SHAP (SHapley Additive exPlanations) to improve the interpretability of Machine Learning predictions.
-
-A prediction alone may not explain why a particular URL is classified as suspicious. SHAP helps examine the contribution of individual features to the model's output.
-
-Some URL characteristics that may be considered include:
-
-- URL length.
-- Domain-related information.
-- Other extracted URL features.
-
-This helps users gain a better understanding of the factors influencing the prediction.
-
----
+## Accuracy note
+Do not present the heuristic risk score as "95.4% AI accuracy" unless you have a tested model, a held-out test set, and measured metrics. The original prototype displayed a fixed accuracy value; this version removes that unsupported claim.
 
 
-## 🚀 How to Use
+## Add the ML + SHAP model
+After installing requirements, run:
 
-1. Start the Flask application.
-2. Open PhishShield AI in your browser.
-3. Navigate to the dashboard.
-4. Select the URL scanner or email scanner.
-5. Enter the URL or email content you want to analyze.
-6. Submit the input for detection.
-7. View the prediction, risk score, and confidence level.
-8. Review the available explanation and scan information.
+`python train_model.py`
 
----
+This creates:
+- `models/url_model.joblib`
+- `models/feature_names.joblib`
+- `training_urls.csv`
 
+The web application automatically loads the saved RandomForest model if those files exist. SHAP explanations are generated from the same URL feature vector.
 
-## 🔮 Future Enhancements
-
-The project can be extended with additional capabilities, such as:
-
-- Real-time phishing intelligence integration.
-- Improved detection accuracy using larger datasets.
-- Enhanced email analysis.
-- Additional visualization of SHAP explanations.
-- Advanced scan history and report generation.
-- Improved multilingual support.
-- Additional security and access-control features.
-
----
-
-## ⚠️ Disclaimer
-
-PhishShield AI is an academic project developed for educational and cybersecurity research purposes.
-
-The predictions generated by the system should not be considered a guarantee that a website or email is safe. Users should exercise caution when interacting with unfamiliar links and messages.
-
----
-
-## 🎓 Project Information
-
-**Project Title:** PhishShield AI – AI-Powered Phishing Detection with Explainable AI
-
-**Domain:** Cybersecurity and Artificial Intelligence
-
-**Project Type:** Academic / Honours Project
-
-**Development Technologies:** Python, Flask, Machine Learning and Explainable AI
-
----
-
-## 👩‍💻 Developer
-
-Developed as an academic project with a focus on applying Artificial Intelligence and Machine Learning techniques to cybersecurity challenges.
-
----
+### Do not claim "100% accuracy"
+The training script prints a held-out test result, but the included starter dataset is small and synthetic/curated. For an honours-project accuracy claim, train on a larger reputable dataset, keep an untouched test set, and report accuracy, precision, recall, F1 and ROC-AUC.
